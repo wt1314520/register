@@ -11,11 +11,13 @@ project(shixun LANGUAGES CXX)
 add_executable(shixun
     #math.cpp                              # 模块实现单元
     main.cpp
-    student.cppm
+    studentbroker.cppm
+
 )
 
 set(MODULE_INTERFACE_FILES
     #${MODULE_LIB_DIR1}/utils.cppm         #添加模块库的模块接口单元
+    student.cppm
     #math.cppm                             # 模块接口单元
 )
 
