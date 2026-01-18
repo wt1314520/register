@@ -1,0 +1,23 @@
+领域层：实体接口定义course.cppm：定义课程实体 Course 和评分结构体 CourseScore，包含课程的基本信息、选课、评分等接口声明。
+student.cppm：定义学生实体 Student，包含学生基本信息、选课等接口声明。
+应用逻辑层：业务实现course.cpp：实现 Course 类的具体逻辑，包括：
+acceptEnrollment()：处理学生选课，避免重复选课。
+setStudentScore()：调用数据层保存评分，并更新本地缓存。
+getStudentScore()：优先从本地缓存获取评分，无则查询数据库。
+student.cpp：实现 Student 类的具体逻辑，包括enrollIn()：调用课程的 acceptEnrollment() 完成选课。
+getEnrolledCourses()：返回学生已选课程列表。
+3. 数据管理层：数据库操作（Broker 模式）
+coursebroker.cppm：课程数据访问层，负责课程的 CRUD 和评分操作：
+findById()/findAll()：查询课程信息。
+saveScore()/getScore()/getCourseAllScores()：保存、查询学生评分。
+单例模式 singleton()：保证全局只有一个数据库连接实例。
+studentbroker.cppm：学生数据访问层，负责学生的 CRUD：
+findById()：根据 ID 查询学生。
+save()/remove()：保存、删除学生信息。
+4. 表现层：主程序入口
+main.cpp：通过调用各层接口，演示完整业务流程：
+查询已有课程（C001：C++ 程序设计）。
+给学生张三（S001）的 C++ 课程打分。
+查询张三的 C++ 课程评分。
+查询 C001 课程所有学生的评分。
+新增 / 更新课程信息（C003：面向对象设计）。
