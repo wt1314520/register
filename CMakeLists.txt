@@ -11,6 +11,8 @@ project(shixun LANGUAGES CXX)
 add_executable(shixun
     #math.cpp                              # 模块实现单元
     main.cpp
+    course.cppm
+
 )
 
 set(MODULE_INTERFACE_FILES
