@@ -97,4 +97,82 @@ public:
             return false;
         }
     }
+    // 5. 保存选课记录
+    bool saveEnrollment(string studentId, string courseId) {
+        try {
+            pqxx::work txn(conn);
+            // 检查是否已选课
+            auto res = txn.exec(
+                "SELECT * FROM student_course WHERE student_id = '" + studentId +
+                "' AND course_id = '" + courseId + "'"
+            );
+            if (!res.empty()) {
+                txn.commit();
+                return false; // 已选过
+            }
+            // 插入选课记录
+            txn.exec(
+                "INSERT INTO student_course (student_id, course_id) VALUES ('" +
+                studentId + "', '" + courseId + "')"
+            );
+            txn.commit();
+            return true;
+        } catch (const std::exception& e) {
+            std::cerr << "选课失败：" << e.what() << std::endl;
+            return false;
+        }
+    }
 
+    // 6. 保存/更新学生课程评分
+    bool saveScore(string studentId, string courseId, double score, string comment) {
+        try {
+            pqxx::work txn(conn);
+            // 检查是否已有评分（有则更新，无则插入）
+            auto res = txn.exec(
+                "SELECT id FROM course_scores WHERE student_id = '" + studentId +
+                "' AND course_id = '" + courseId + "'"
+            );
+            if (!res.empty()) {
+                // 更新评分
+                txn.exec(
+                    "UPDATE course_scores SET score = " + std::to_string(score) +
+                    ", teacher_comment = '" + comment + "'"
+                    " WHERE student_id = '" + studentId + "' AND course_id = '" + courseId + "'"
+                );
+            } else {
+                // 插入新评分
+                txn.exec(
+                    "INSERT INTO course_scores (student_id, course_id, score, teacher_comment) VALUES ('" +
+                    studentId + "', '" + courseId + "', " + std::to_string(score) + ", '" + comment + "')"
+                );
+            }
+            txn.commit();
+            return true;
+        } catch (const std::exception& e) {
+            std::cerr << "保存评分失败：" << e.what() << std::endl;
+            return false;
+        }
+    }
+
+    // 7. 查询学生课程评分
+    CourseScore getScore(string studentId, string courseId) {
+        CourseScore score{};
+        try {
+            pqxx::work txn(conn);
+            auto res = txn.exec(
+                "SELECT score, teacher_comment, create_time FROM course_scores "
+                "WHERE student_id = '" + studentId + "' AND course_id = '" + courseId + "'"
+            );
+            txn.commit();
+            if (!res.empty()) {
+                score.student_id = studentId;
+                score.course_id = courseId;
+                score.score = res[0]["score"].as<double>();
+                score.teacher_comment = res[0]["teacher_comment"].as<string>();
+                score.create_time = res[0]["create_time"].as<string>();
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "查询评分失败：" << e.what() << std::endl;
+        }
+        return score;
+    }
