@@ -61,3 +61,12 @@ void Course::setStudentScore(string student_id, double score, string comment) {
     cs.create_time = dbScore.create_time;
     _scores[student_id] = cs;
 }
+CourseScore Course::getStudentScore(string student_id) {
+    if (_scores.find(student_id) != _scores.end()) {
+        return _scores[student_id];
+    }
+    // 从数据库查询并缓存
+    auto score = CourseBroker::singleton().getScore(student_id, m_id);
+    _scores[student_id] = score;
+    return score;
+}
