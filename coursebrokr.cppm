@@ -176,3 +176,28 @@ public:
         }
         return score;
     }
+    // 8. 查询课程所有学生的评分
+    vector<CourseScore> getCourseAllScores(string courseId) {
+        vector<CourseScore> scores;
+        try {
+            pqxx::work txn(conn);
+            auto res = txn.exec(
+                "SELECT student_id, course_id, score, teacher_comment, create_time FROM course_scores "
+                "WHERE course_id = '" + courseId + "'"
+            );
+            txn.commit();
+            for (auto& row : res) {
+                CourseScore score;
+                score.student_id = row["student_id"].as<string>();
+                score.course_id = row["course_id"].as<string>();
+                score.score = row["score"].as<double>();
+                score.teacher_comment = row["teacher_comment"].as<string>();
+                score.create_time = row["create_time"].as<string>();
+                scores.push_back(score);
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "查询课程评分失败：" << e.what() << std::endl;
+        }
+        return scores;
+    }
+};
